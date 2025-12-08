@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Bunny Birthday</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <text y='0.9em' font-size='90'>💖</text>
+  </svg>
+"
+    />
+
+    <meta
+      name="description"
+      content="A modern cinematic birthday gallery — clean, responsive and production-ready."
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Playfair+Display:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --accent: #ff6da7;
+        --accent-2: #7c3aed;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      .fade-in-up {
+        transform: translateY(12px);
+        opacity: 0;
+        transition: all 0.6s cubic-bezier(0.2, 0.9, 0.2, 1);
+      }
+      .fade-in-up.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      @keyframes pulseShadow {
+        0% {
+          box-shadow: 0 14px 40px rgba(2, 6, 23, 0.09);
+        }
+        50% {
+          box-shadow: 0 26px 60px rgba(2, 6, 23, 0.12);
+        }
+        100% {
+          box-shadow: 0 14px 40px rgba(2, 6, 23, 0.09);
+        }
+      }
+      .pulse-shadow {
+        animation: pulseShadow 3.2s ease-in-out infinite;
+      }
+      .focus-ring:focus {
+        outline: 3px solid rgba(124, 58, 237, 0.14);
+        outline-offset: 3px;
+        border-radius: 0.5rem;
+      }
+      body {
+        background: #000;
+        color: #fff;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+      }
+      .aspect-square {
+        position: relative;
+        width: 100%;
+      }
+      .aspect-square::before {
+        content: "";
+        display: block;
+        padding-top: 100%;
+      }
+      .aspect-square > * {
+        position: absolute;
+        inset: 0;
+      }
+      .lb-open {
+        display: flex !important;
+      }
+    </style>
+  </head>
+
+  <body class="relative min-h-screen antialiased overflow-x-hidden">
+    <!-- background video (deferred load) -->
+    <video
+      id="bg-video"
+      class="fixed inset-0 w-full h-full object-cover -z-20"
+      playsinline
+      muted
+      loop
+      aria-hidden="true"
+      preload="none"
+      poster="bg-poster-1280.jpg"
+    ></video>
+    <div
+      class="fixed inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/50 to-black/60"
+    ></div>
+
+    <div class="max-w-7xl mx-auto px-6 py-12">
+      <header class="flex items-center justify-between gap-6 mb-6">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] shadow-xl flex items-center justify-center"
+          >
+            <img
+              src="1002064262.jpg"
+              alt="logo"
+              class="w-full h-full object-cover"
+            />
+          </div>
+
+          <div>
+            <h1 class="text-lg md:text-xl font-semibold text-white">
+              Bunny — Memories
+            </h1>
+          </div>
+        </div>
+      </header>
+
+      <section
+        class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start fade-in-up"
+      >
+        <div class="lg:col-span-2">
+          <div
+            class="group relative rounded-3xl bg-white p-10 shadow-[0_20px_60px_rgba(0,0,0,0.15)] hover:shadow-[0_30px_90px_rgba(0,0,0,0.22)] hover:-translate-y-2 hover:scale-[1.015] transition-all duration-500 ease-[cubic-bezier(.19,1,.22,1)] overflow-hidden"
+          >
+            <div
+              class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-br from-white/40 via-transparent to-transparent"
+            ></div>
+            <h2
+              class="text-4xl text-center md:text-5xl font-playfair font-extrabold text-slate-900 z-10 relative"
+            >
+              Happy Birthday Bunny
+            </h2>
+            <p
+              class="mt-6 max-w-3xl mx-auto text-center leading-relaxed text-black text-2xl md:text-[28px] font-[500] tracking-tight z-10 relative"
+            >
+              كنا محتارين شويه في موضوع السايت ده بسبب ضغط الشغل عندي مش أكثر —
+              والحمد لله عرفنا نظبطها.
+            </p>
+            <div class="mt-8 flex justify-center gap-3 z-10 relative">
+              <a
+                href="#gallery"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] text-white text-lg font-semibold shadow-[0_10px_25px_rgba(124,58,237,0.35)] hover:scale-110 transition-transform duration-300 focus-ring"
+                >Show photos</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <aside class="rounded-2xl bg-white p-0 overflow-hidden shadow-xl">
+          <div class="relative w-full h-80 bg-black">
+            <video
+              id="promo-video"
+              controls
+              playsinline
+              preload="metadata"
+              class="w-full h-full object-cover"
+            >
+              <source src="2025-12-02-225333185.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <div class="p-4">
+            <div class="text-la font-bold text-slate-900">
+              Warm the moments With you 🫀🫂🔐
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <div class="mt-8 w-full h-6 opacity-15 mb-6">
+        <svg
+          class="w-full h-full"
+          viewBox="0 0 1200 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0 12C150 0 350 24 600 12C850 0 1050 24 1200 12"
+            stroke="rgba(255,255,255,0.06)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+
+      <!-- GALLERY (kept all cards + data as provided) -->
+      <div id="gallery" class="container mx-auto px-4">
+        <main class="mt-10">
+          <section
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch"
+          >
+            <!-- Group 1 (original three) -->
+            <article
+              data-id="1"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up flex flex-col h-full"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_214219.jpg"
+                  alt="memory 1"
+                  data-full="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="mt-3 font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  نقول بسم لله اخر صور لينا بعد غياب كتير عامة لما تشوفي الكلام
+                  ده هيكون يوم عيد ميلادك واخلي يوم يوم عامة حتي مميز زيك 🤩♥
+                  احلي لحظات في الحياه بتبقي واحنا سوا وبحب كل حاجه لينا حقيقي
+                  قريبه ليا ♥🫂 كل صوره لينا ليها ذكري وده كان يوم عبثي جدا بس
+                  الصور تحفه معروفه عشان بوب فيها 🤩😂 The kindest and most
+                  beautiful person in the world. 🫀🫂🔐
+                </p>
+              </div>
+            </article>
+
+            <article
+              data-id="2"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up"
+              style="transition-delay: 0.06s"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_215050.jpg"
+                  alt="memory 2"
+                  data-full="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p class="mt-3 font-bold text-slate-700 text-lg">
+                  يعني عندك مثلا الصوره اللي فوق ديه كان يوم شاربين في حته
+                  لوحدنا من اللي كان بيحصل وانتي عارفه بقا 😂😂😂 بس كان من احلي
+                  وأمتع ايامي والله ♥🫂 أما اللي تحت ديه كنا عاملين ماتشي ماتشي
+                  بالصدفه عامة كل الماتشي ماتشي بتاعنا صدفه وبتبقي احلي صدفه بجد
+                  😂🥹🤩 اخر ايام الشتويه الصوره اللي في الاخر واخر صور لينا في
+                  الشتا يارب يكون بفتكر صح انتي عارفه بنسي 🤩 عامة كل حاجه لينا
+                  هنا ليها في قلبي حاجه كل ما بتفكر بضحك من قلبي وبفرح بجد ♥🫂
+                </p>
+              </div>
+            </article>
+
+            <article
+              data-id="3"
+              class="card group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up flex flex-col h-full"
+              style="transition-delay: 0.12s"
+            >
+              <div
+                class="card-media aspect-square bg-slate-900 overflow-hidden"
+              >
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_214409.jpg"
+                  alt="memory 3"
+                />
+              </div>
+
+              <div
+                class="card-body p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  الكثير والكثير من بوظ البطه وعيون القهوه اللي بموت فيها والله
+                  🤎🫂🔐✨
+                </p>
+              </div>
+            </article>
+
+            <!-- Next group (repeat as in your input) -->
+            <article
+              data-id="1"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_215235.jpg"
+                  alt="memory 1"
+                  data-full="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  ماتشي ماتشي تاني بس يوم ميتعوضش بجد من صور وضحك وفيديوز سوا
+                  فااااااكره الفيديو يومها
+                  😂🥹💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜
+                </p>
+              </div>
+            </article>
+
+            <article
+              data-id="2"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+              style="transition-delay: 0.06s"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_221652.jpg"
+                  alt="memory 2"
+                  data-full="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  اول مره اخد بالي اللي لينا صور بنفس الالون سوا ونفس الماتشي
+                  ماتشي بردو 😂🥹🩵🩵🩵🩵🩵🫂🔐 بس بقولك ايه كان يومين ولا غلطه فيهم
+                  في اي صوره ومن بعديها متصورناش باين 😭😀
+                </p>
+              </div>
+            </article>
+
+            <article
+              data-id="3"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+              style="transition-delay: 0.12s"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_222227.jpg"
+                  alt="memory 3"
+                  data-full="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  تلت سنين سوا كل حاجه فيهم سوا وبجد معرفش الوقت عدي ازاي كده بس
+                  بحب أوقاتنا سوا بجد 😭♥♥♥♥♥♥♥♥🫂 بالذات صوره يوم الفطار ديه
+                  بموت في يوم ده جدا ♥🫂
+                </p>
+              </div>
+            </article>
+
+            <!-- Next group (repeat) -->
+            <article
+              data-id="1"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_222007.jpg"
+                  alt="memory 1"
+                  data-full="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  اليوم اللي نزلت في مخصوص لاجل عيون بوب هانم متبقاش زعلانه أو
+                  لوحدها وانا بردو عندي كام بوب 🤩♥ احلي صوره اتصورنها سوا بجد
+                  تغفيله بس ايه بضحك تلقائيا لما بشوفها 😭♥♥♥♥♥♥♥🫂
+                </p>
+              </div>
+            </article>
+
+            <article
+              data-id="2"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+              style="transition-delay: 0.06s"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_222421.jpg"
+                  alt="memory 2"
+                  data-full="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  الصور اللي في أول ديه بتدل علي ايام كنا فيها بنعمل حاجات عره
+                  لا وكنا متأثرين اوي 😀 بس ايه كله يهون لأجل اللقطه الحلوه ديه
+                  🤩🥹♥♥♥♥♥♥♥♥♥♥
+                </p>
+              </div>
+            </article>
+
+            <article
+              data-id="3"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+              style="transition-delay: 0.12s"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_222819.jpg"
+                  alt="memory 3"
+                  data-full="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  هسيبك انتي تفتكري ونفتكر سوا لما اشوفك يومها 😂🥹♥♥♥♥♥♥♥♥🫂
+                </p>
+              </div>
+            </article>
+
+            <!-- Next group -->
+            <article
+              data-id="1"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_222553.jpg"
+                  alt="memory 1"
+                  data-full="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  The best thing in my life and the most beautiful Bob, I love
+                  you so much 🫀🫂🔐
+                </p>
+              </div>
+            </article>
+
+            <article
+              data-id="2"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+              style="transition-delay: 0.06s"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251202_223216.jpg"
+                  alt="memory 2"
+                  data-full="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  Memories and more memories, and they keep going. 🫀🫂🔐
+                </p>
+              </div>
+            </article>
+
+            <article
+              data-id="3"
+              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
+              style="transition-delay: 0.12s"
+            >
+              <div class="aspect-square bg-slate-900 overflow-hidden">
+                <img
+                  loading="lazy"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="IMG_20251203_161145.jpg"
+                  alt="memory 3"
+                  data-full="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=2000&q=80"
+                />
+              </div>
+              <div
+                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+              >
+                <p
+                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                >
+                  واخيرا وليس اخرا احلي صور لينا انا بحبها وانتي كمان ♥🫂 حقيقي
+                  ياما عيشنا وشوفنا كتير وياما قوينا بعض علي كل حاجه وعيطنا
+                  وضحكنا من قلبنا ولسه تاني عادي 🥹🫂 عشره تلت سنين يمكن مش كتير
+                  صحاب بس كل سنه لينا سوا عمر مع بعض وحقيقي الواحد ممتن للمظاهرة
+                  اللي جمعتنا سوا وديه اعبث حاجه اصلا بس عادي فدانا 😂🥹 كل سنه
+                  وانتي طيبه ومبسوطه ومعايا علي طول وكل سنه وانتي بوب وانا بس
+                  اللي اقول كده معلش ديه خصوصية 🤩 كل سنه وانا شايفكي بتنحجي
+                  وبتبقي احسن وببقي فخوره بيكي واكيد بيبقي باين في كل موقف
+                  🫀🫂🔐 كل سنه وانتي في حضني واحنا بنشوف الحاجات ديه بنضحك زي
+                  العبط ومحدش فاهم غيرنا 😂🥹♥♥♥♥♥♥🫂 لما تشوفي الكلام دايما
+                  خليني في بالك يمكن الدنيا تفرقنا في يوم ومحدش ضامن عامة بس
+                  دايما افتكري اني ليكي حد لو اي حصل هيفضل يحبك وتفضلي اقرب حد
+                  لي واهي سايبه ليكي حاجه واتمني دايما اكون في بالك بالخير
+                  وتفضلي اجمل وألطف وااشطر حبيبه في دنيا 🫀🫂🔐 I love you so
+                  much, your friend Namroozaaa🥹🫀🫂🔐
+                </p>
+              </div>
+            </article>
+
+            <!-- Additional cards repeated in original input (kept content) -->
+            <!-- You can add/remove duplicates as your original had many repeated groups; I've preserved the blocks present in your last paste. -->
+          </section>
+
+        </main>
+      </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    
+
+   
+    <div id="sr-live" class="sr-only" aria-live="polite"></div>
+
+    <!-- keep your external gallery.js (defer) -->
+    <script src="gallery.js" defer></script>
+
+    <!-- fade-in init -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document
+          .querySelectorAll(".fade-in-up")
+          .forEach((el, i) =>
+            setTimeout(() => el.classList.add("show"), 90 * i)
+          );
+      });
+    </script>
+
+    <!-- Lenis smooth scroll (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.10/bundled/lenis.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        try {
+          const lenis = new Lenis({
+            duration: 1.2,
+            smooth: true,
+            smoothTouch: true,
+            direction: "vertical",
+          });
+          function raf(t) {
+            lenis.raf(t);
+            requestAnimationFrame(raf);
+          }
+          requestAnimationFrame(raf);
+          window._lenis = lenis;
+        } catch (e) {
+          console.warn("Lenis failed", e);
+        }
+      });
+    </script>
+
+    <!-- deferred background video loader + toggle button -->
+    <script>
+      (function () {
+        const conn = navigator.connection || {};
+        const saveData = conn.saveData === true;
+        const effective = conn.effectiveType || "4g";
+        function loadBgVideo() {
+          const v = document.getElementById("bg-video");
+          if (!v) return;
+          if (v.querySelector("source")) return;
+          const s = document.createElement("source");
+          s.src = "2025-12-02-224627526.mp4";
+          s.type = "video/mp4";
+          v.appendChild(s);
+          v.load();
+          v.play().catch(() => {});
+        }
+        if (
+          !saveData &&
+          (effective.indexOf("4g") >= 0 || effective === "unknown")
+        ) {
+          if ("requestIdleCallback" in window)
+            requestIdleCallback(loadBgVideo, { timeout: 1500 });
+          else setTimeout(loadBgVideo, 1500);
+        }
+        document
+          .getElementById("toggleVideo")
+          .addEventListener("click", function () {
+            loadBgVideo();
+            this.textContent = "خلفية متاحة";
+            this.disabled = true;
+          });
+      })();
+    </script>
+
+    <!-- minimal lightbox (uses data-full attributes) -->
+    <script>
+      (function () {
+        const lb = document.getElementById("lightbox");
+        const lbImg = document.getElementById("lb-img");
+        const lbCaption = document.getElementById("lb-caption");
+        const closeBtn = document.getElementById("close-lb");
+        const downloadBtn = document.getElementById("download-img");
+
+        document.addEventListener("click", (e) => {
+          const img = e.target.closest && e.target.closest("img[data-full]");
+          if (!img) return;
+          e.preventDefault();
+          lbImg.src = img.getAttribute("data-full") || img.src;
+          lbCaption.textContent = img.alt || "";
+          lb.classList.remove("hidden");
+          lb.classList.add("lb-open");
+          const panel = document.getElementById("lb-panel");
+          panel.style.opacity = "1";
+          panel.style.transform = "scale(1)";
+        });
+
+        function closeLB() {
+          const panel = document.getElementById("lb-panel");
+          panel.style.opacity = "0";
+          panel.style.transform = "scale(.95)";
+          lb.classList.add("hidden");
+          lb.classList.remove("lb-open");
+          lbImg.src = "";
+        }
+        closeBtn.addEventListener("click", closeLB);
+        lb.addEventListener("click", (e) => {
+          if (e.target === lb) closeLB();
+        });
+        downloadBtn.addEventListener("click", () => {
+          if (!lbImg.src) return;
+          const a = document.createElement("a");
+          a.href = lbImg.src;
+          a.download = "";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        });
+      })();
+    </script>
+  </body>
+</html>
