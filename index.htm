@@ -12,7 +12,6 @@
   </svg>
 "
     />
-
     <meta
       name="description"
       content="A modern cinematic birthday gallery — clean, responsive and production-ready."
@@ -26,10 +25,21 @@
       :root {
         --accent: #ff6da7;
         --accent-2: #7c3aed;
+        --lb-scroll-bg: rgba(124,58,237,0.12);
+        --lb-scroll-thumb: rgba(124,58,237,0.32);
       }
       html,
       body {
         height: 100%;
+      }
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       .fade-in-up {
         transform: translateY(12px);
@@ -40,31 +50,7 @@
         transform: translateY(0);
         opacity: 1;
       }
-      @keyframes pulseShadow {
-        0% {
-          box-shadow: 0 14px 40px rgba(2, 6, 23, 0.09);
-        }
-        50% {
-          box-shadow: 0 26px 60px rgba(2, 6, 23, 0.12);
-        }
-        100% {
-          box-shadow: 0 14px 40px rgba(2, 6, 23, 0.09);
-        }
-      }
-      .pulse-shadow {
-        animation: pulseShadow 3.2s ease-in-out infinite;
-      }
-      .focus-ring:focus {
-        outline: 3px solid rgba(124, 58, 237, 0.14);
-        outline-offset: 3px;
-        border-radius: 0.5rem;
-      }
-      body {
-        background: #000;
-        color: #fff;
-        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial;
-      }
+
       .aspect-square {
         position: relative;
         width: 100%;
@@ -78,8 +64,144 @@
         position: absolute;
         inset: 0;
       }
-      .lb-open {
-        display: flex !important;
+
+      /* CARD CAPTION TRUNCATION */
+      .card-caption {
+        color: #1f2937; /* slate-700 */
+        background: transparent;
+        margin: 0;
+      }
+      .clamped {
+        display: -webkit-box;
+        -webkit-line-clamp: 4; /* show 4 lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      @media (max-width: 720px){
+        .clamped { -webkit-line-clamp: 3; } /* a bit shorter on phones */
+      }
+      .read-more-btn {
+        display: inline-block;
+        margin-top: .6rem;
+        background: transparent;
+        color: #7c3aed;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 0;
+        font-size: 0.98rem;
+      }
+      .read-more-btn:focus { outline: 2px solid rgba(124,58,237,0.18); border-radius:6px; padding:2px 4px; }
+
+      /* LIGHTBOX core */
+      #lightbox {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.6),
+          rgba(0, 0, 0, 0.92)
+        );
+        padding: 18px;
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+      }
+      #lightbox.lb-open {
+        display: flex;
+      }
+      #lb-panel {
+        width: min(1100px, 96%);
+        max-height: 92vh;
+        background: rgba(11, 18, 32, 0.98);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(2, 6, 23, 0.7);
+        transform: translateY(8px);
+        opacity: 0;
+        transition: all 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+        display: grid;
+        grid-template-rows: 1fr auto;
+      }
+      #lightbox.lb-open #lb-panel {
+        transform: none;
+        opacity: 1;
+      }
+
+      /* center & ensure image fits nicely on phones */
+      #lb-media {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #06111a;
+        position: relative;
+        padding: 0;
+        height: calc(100vh - 210px); /* keeps space for caption area while centering image */
+        max-height: calc(100vh - 210px);
+      }
+      @media (max-width:720px){
+        #lb-media { height: calc(100vh - 160px); max-height: calc(100vh - 160px); }
+      }
+
+      #lb-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        display: block;
+        transition: transform 0.28s ease;
+        touch-action: none;
+      }
+      #lb-img.zoomed { transform: scale(1.12); cursor: grab; }
+
+      /* LIGHTBOX caption area contains the text + read more button */
+      #lb-caption {
+        padding: 1rem;
+        color: #e6edf6;
+        font-size: 1rem;
+        line-height: 1.45;
+        max-height: 240px;
+        overflow: auto;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.01),
+          rgba(0, 0, 0, 0.02)
+        );
+      }
+      #lb-caption p { margin: 0 0 .45rem 0; color: #e6edf6; }
+
+      .lb-readmore {
+        background: transparent;
+        border: none;
+        color: #ff6da7;
+        font-weight:700;
+        cursor:pointer;
+        padding:0;
+      }
+      .lb-readmore:focus { outline:2px solid rgba(255,109,167,0.12); border-radius:6px; padding:2px 4px; }
+
+      /* styled scrollbar for lightbox caption */
+      #lb-caption::-webkit-scrollbar { width: 10px; height: 10px; }
+      #lb-caption::-webkit-scrollbar-track { background: transparent; margin:6px; border-radius:10px; }
+      #lb-caption::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, var(--lb-scroll-thumb), rgba(124,58,237,0.18));
+        border-radius: 10px;
+        border: 2px solid rgba(11,18,32,0.98);
+        backdrop-filter: blur(2px);
+      }
+      /* firefox */
+      #lb-caption { scrollbar-width: thin; scrollbar-color: var(--lb-scroll-thumb) transparent; }
+
+      /* small things */
+      .sr-only {
+        position: absolute;
+        left: -10000px;
+        width: 1px;
+        height: 1px;
+        top: auto;
+        overflow: hidden;
       }
     </style>
   </head>
@@ -112,7 +234,6 @@
               class="w-full h-full object-cover"
             />
           </div>
-
           <div>
             <h1 class="text-lg md:text-xl font-semibold text-white">
               Bunny — Memories
@@ -145,7 +266,7 @@
             <div class="mt-8 flex justify-center gap-3 z-10 relative">
               <a
                 href="#gallery"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] text-white text-lg font-semibold shadow-[0_10px_25px_rgba(124,58,237,0.35)] hover:scale-110 transition-transform duration-300 focus-ring"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] text-white text-lg font-semibold shadow-[0_10px_25px_rgba(124,58,237,0.35)] hover:scale-110 transition-transform duration-300"
                 >Show photos</a
               >
             </div>
@@ -188,13 +309,13 @@
         </svg>
       </div>
 
-      <!-- GALLERY (kept all cards + data as provided) -->
+      <!-- GALLERY -->
       <div id="gallery" class="container mx-auto px-4">
         <main class="mt-10">
           <section
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch"
           >
-            <!-- Group 1 (original three) -->
+            <!-- ARTICLE 1 -->
             <article
               data-id="1"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up flex flex-col h-full"
@@ -205,25 +326,22 @@
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_214219.jpg"
                   alt="memory 1"
-                  data-full="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=2000&q=80"
+                  data-full="IMG_20251202_214219.jpg"
                 />
               </div>
               <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+                class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col"
               >
                 <p
-                  class="mt-3 font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
+                  class="card-caption mt-3 font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped"
                 >
-                  نقول بسم لله اخر صور لينا بعد غياب كتير عامة لما تشوفي الكلام
-                  ده هيكون يوم عيد ميلادك واخلي يوم يوم عامة حتي مميز زيك 🤩♥
-                  احلي لحظات في الحياه بتبقي واحنا سوا وبحب كل حاجه لينا حقيقي
-                  قريبه ليا ♥🫂 كل صوره لينا ليها ذكري وده كان يوم عبثي جدا بس
-                  الصور تحفه معروفه عشان بوب فيها 🤩😂 The kindest and most
-                  beautiful person in the world. 🫀🫂🔐
+                  نقول بسم لله اخر صور لينا بعد غياب كتير عامة لما تشوفي الكلام ده هيكون يوم عيد ميلادك واخلي يوم يوم عامة حتي مميز زيك 🤩♥ احلي لحظات في الحياه بتبقي واحنا سوا وبحب كل حاجه لينا حقيقي قريبه ليا ♥🫂 كل صوره لينا ليها ذكري وده كان يوم عبثي جدا بس الصور تحفه معروفه عشان بوب فيها 🤩😂 The kindest and most beautiful person in the world. 🫀🫂🔐
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
+            <!-- ARTICLE 2 -->
             <article
               data-id="2"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up"
@@ -235,24 +353,20 @@
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_215050.jpg"
                   alt="memory 2"
-                  data-full="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=2000&q=80"
+                  data-full="IMG_20251202_215050.jpg"
                 />
               </div>
               <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
+                class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col"
               >
-                <p class="mt-3 font-bold text-slate-700 text-lg">
-                  يعني عندك مثلا الصوره اللي فوق ديه كان يوم شاربين في حته
-                  لوحدنا من اللي كان بيحصل وانتي عارفه بقا 😂😂😂 بس كان من احلي
-                  وأمتع ايامي والله ♥🫂 أما اللي تحت ديه كنا عاملين ماتشي ماتشي
-                  بالصدفه عامة كل الماتشي ماتشي بتاعنا صدفه وبتبقي احلي صدفه بجد
-                  😂🥹🤩 اخر ايام الشتويه الصوره اللي في الاخر واخر صور لينا في
-                  الشتا يارب يكون بفتكر صح انتي عارفه بنسي 🤩 عامة كل حاجه لينا
-                  هنا ليها في قلبي حاجه كل ما بتفكر بضحك من قلبي وبفرح بجد ♥🫂
+                <p class="mt-3 font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line card-caption clamped">
+                  يعني عندك مثلا الصوره اللي فوق ديه كان يوم شاربين في حته لوحدنا من اللي كان بيحصل وانتي عارفه بقا 😂😂😂 بس كان من احلي وأمتع ايامي والله ♥🫂 أما اللي تحت ديه كنا عاملين ماتشي ماتشي بالصدفه عامة كل الماتشي ماتشي بتاعنا صدفه وبتبقي احلي صدفه بجد 😂🥹🤩 اخر ايام الشتويه الصوره اللي في الاخر واخر صور لينا في الشتا يارب يكون بفتكر صح انتي عارفه بنسي 🤩 عامة كل حاجه لينا هنا ليها في قلبي حاجه كل ما بتفكر بضحك من قلبي وبفرح بجد ♥🫂
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
+            <!-- ARTICLE 3 -->
             <article
               data-id="3"
               class="card group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up flex flex-col h-full"
@@ -266,22 +380,21 @@
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_214409.jpg"
                   alt="memory 3"
+                  data-full="IMG_20251202_214409.jpg"
                 />
               </div>
 
               <div
-                class="card-body p-6 bg-white flex-1 flex items-center justify-center text-center"
+                class="card-body p-6 bg-white flex-1 flex items-start justify-center text-right flex-col"
               >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
-                  الكثير والكثير من بوظ البطه وعيون القهوه اللي بموت فيها والله
-                  🤎🫂🔐✨
+                <p class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line card-caption clamped">
+                  الكثير والكثير من بوظ البطه وعيون القهوه اللي بموت فيها والله 🤎🫂🔐✨
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
-            <!-- Next group (repeat as in your input) -->
+            <!-- ARTICLE 4 -->
             <article
               data-id="1"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -291,23 +404,19 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_215235.jpg"
-                  alt="memory 1"
-                  data-full="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 4"
+                  data-full="IMG_20251202_215235.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
-                  ماتشي ماتشي تاني بس يوم ميتعوضش بجد من صور وضحك وفيديوز سوا
-                  فااااااكره الفيديو يومها
-                  😂🥹💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
+                  ماتشي ماتشي تاني بس يوم ميتعوضش بجد من صور وضحك وفيديوز سوا فااااااكره الفيديو يومها 😂🥹💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜💜
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
+            <!-- ARTICLE 5 -->
             <article
               data-id="2"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -318,23 +427,19 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_221652.jpg"
-                  alt="memory 2"
-                  data-full="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 5"
+                  data-full="IMG_20251202_221652.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
-                  اول مره اخد بالي اللي لينا صور بنفس الالون سوا ونفس الماتشي
-                  ماتشي بردو 😂🥹🩵🩵🩵🩵🩵🫂🔐 بس بقولك ايه كان يومين ولا غلطه فيهم
-                  في اي صوره ومن بعديها متصورناش باين 😭😀
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
+                  اول مره اخد بالي اللي لينا صور بنفس الالون سوا ونفس الماتشي ماتشي بردو 😂🥹🩵🩵🩵🩵🩵🫂🔐 بس بقولك ايه كان يومين ولا غلطه فيهم في اي صوره ومن بعديها متصورناش باين 😭😀
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
+            <!-- ARTICLE 6 -->
             <article
               data-id="3"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -345,24 +450,19 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_222227.jpg"
-                  alt="memory 3"
-                  data-full="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 6"
+                  data-full="IMG_20251202_222227.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
-                  تلت سنين سوا كل حاجه فيهم سوا وبجد معرفش الوقت عدي ازاي كده بس
-                  بحب أوقاتنا سوا بجد 😭♥♥♥♥♥♥♥♥🫂 بالذات صوره يوم الفطار ديه
-                  بموت في يوم ده جدا ♥🫂
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
+                  تلت سنين سوا كل حاجه فيهم سوا وبجد معرفش الوقت عدي ازاي كده بس بحب أوقاتنا سوا بجد 😭♥♥♥♥♥♥♥♥🫂 بالذات صوره يوم الفطار ديه بموت في يوم ده جدا ♥🫂
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
-            <!-- Next group (repeat) -->
+            <!-- ARTICLE 7 -->
             <article
               data-id="1"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -372,23 +472,19 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_222007.jpg"
-                  alt="memory 1"
-                  data-full="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 7"
+                  data-full="IMG_20251202_222007.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
-                  اليوم اللي نزلت في مخصوص لاجل عيون بوب هانم متبقاش زعلانه أو
-                  لوحدها وانا بردو عندي كام بوب 🤩♥ احلي صوره اتصورنها سوا بجد
-                  تغفيله بس ايه بضحك تلقائيا لما بشوفها 😭♥♥♥♥♥♥♥🫂
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
+                  اليوم اللي نزلت في مخصوص لاجل عيون بوب هانم متبقاش زعلانه أو لوحدها وانا بردو عندي كام بوب 🤩♥ احلي صوره اتصورنها سوا بجد تغفيله بس ايه بضحك تلقائيا لما بشوفها 😭♥♥♥♥♥♥♥🫂
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
+            <!-- ARTICLE 8 -->
             <article
               data-id="2"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -399,23 +495,19 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_222421.jpg"
-                  alt="memory 2"
-                  data-full="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 8"
+                  data-full="IMG_20251202_222421.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
-                  الصور اللي في أول ديه بتدل علي ايام كنا فيها بنعمل حاجات عره
-                  لا وكنا متأثرين اوي 😀 بس ايه كله يهون لأجل اللقطه الحلوه ديه
-                  🤩🥹♥♥♥♥♥♥♥♥♥♥
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
+                  الصور اللي في أول ديه بتدل علي ايام كنا فيها بنعمل حاجات عره لا وكنا متأثرين اوي 😀 بس ايه كله يهون لأجل اللقطه الحلوه ديه 🤩🥹♥♥♥♥♥♥♥♥♥♥
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
+            <!-- ARTICLE 9 -->
             <article
               data-id="3"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -426,22 +518,19 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_222819.jpg"
-                  alt="memory 3"
-                  data-full="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 9"
+                  data-full="IMG_20251202_222819.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
                   هسيبك انتي تفتكري ونفتكر سوا لما اشوفك يومها 😂🥹♥♥♥♥♥♥♥♥🫂
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
-            <!-- Next group -->
+            <!-- ARTICLE 10 -->
             <article
               data-id="1"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -451,22 +540,19 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_222553.jpg"
-                  alt="memory 1"
-                  data-full="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 10"
+                  data-full="IMG_20251202_222553.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
-                  The best thing in my life and the most beautiful Bob, I love
-                  you so much 🫀🫂🔐
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
+                  The best thing in my life and the most beautiful Bob, I love you so much 🫀🫂🔐
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
+            <!-- ARTICLE 11 -->
             <article
               data-id="2"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -477,21 +563,19 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251202_223216.jpg"
-                  alt="memory 2"
-                  data-full="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 11"
+                  data-full="IMG_20251202_223216.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
                   Memories and more memories, and they keep going. 🫀🫂🔐
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
+            <!-- ARTICLE 12 -->
             <article
               data-id="3"
               class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
@@ -502,50 +586,47 @@
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   src="IMG_20251203_161145.jpg"
-                  alt="memory 3"
-                  data-full="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=2000&q=80"
+                  alt="memory 12"
+                  data-full="IMG_20251203_161145.jpg"
                 />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-center justify-center text-center"
-              >
-                <p
-                  class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line"
-                >
-                  واخيرا وليس اخرا احلي صور لينا انا بحبها وانتي كمان ♥🫂 حقيقي
-                  ياما عيشنا وشوفنا كتير وياما قوينا بعض علي كل حاجه وعيطنا
-                  وضحكنا من قلبنا ولسه تاني عادي 🥹🫂 عشره تلت سنين يمكن مش كتير
-                  صحاب بس كل سنه لينا سوا عمر مع بعض وحقيقي الواحد ممتن للمظاهرة
-                  اللي جمعتنا سوا وديه اعبث حاجه اصلا بس عادي فدانا 😂🥹 كل سنه
-                  وانتي طيبه ومبسوطه ومعايا علي طول وكل سنه وانتي بوب وانا بس
-                  اللي اقول كده معلش ديه خصوصية 🤩 كل سنه وانا شايفكي بتنحجي
-                  وبتبقي احسن وببقي فخوره بيكي واكيد بيبقي باين في كل موقف
-                  🫀🫂🔐 كل سنه وانتي في حضني واحنا بنشوف الحاجات ديه بنضحك زي
-                  العبط ومحدش فاهم غيرنا 😂🥹♥♥♥♥♥♥🫂 لما تشوفي الكلام دايما
-                  خليني في بالك يمكن الدنيا تفرقنا في يوم ومحدش ضامن عامة بس
-                  دايما افتكري اني ليكي حد لو اي حصل هيفضل يحبك وتفضلي اقرب حد
-                  لي واهي سايبه ليكي حاجه واتمني دايما اكون في بالك بالخير
-                  وتفضلي اجمل وألطف وااشطر حبيبه في دنيا 🫀🫂🔐 I love you so
-                  much, your friend Namroozaaa🥹🫀🫂🔐
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
+                  واخيرا وليس اخرا احلي صور لينا انا بحبها وانتي كمان ♥🫂 حقيقي ياما عيشنا وشوفنا كتير وياما قوينا بعض علي كل حاجه وعيطنا وضحكنا من قلبنا ولسه تاني عادي 🥹🫂 عشره تلت سنين يمكن مش كتير صحاب بس كل سنه لينا سوا عمر مع بعض وحقيقي الواحد ممتن للمظاهرة اللي جمعتنا سوا وديه اعبث حاجه اصلا بس عادي فدانا 😂🥹 كل سنه وانتي طيبه ومبسوطه ومعايا علي طول وكل سنه وانتي بوب وانا بس اللي اقول كده معلش ديه خصوصية 🤩 كل سنه وانا شايفكي بتنحجي وبتبقي احسن وببقي فخوره بيكي واكيد بيبقي باين في كل موقف 🫀🫂🔐 كل سنه وانتي في حضني واحنا بنشوف الحاجات ديه بنضحك زي العبط ومحدش فاهم غيرنا 😂🥹♥♥♥♥♥♥🫂 لما تشوفي الكلام دايما خليني في بالك يمكن الدنيا تفرقنا في يوم ومحدش ضامن عامة بس دايما افتكري اني ليكي حد لو اي حصل هيفضل يحبك وتفضلي اقرب حد لي واهي سايبه ليكي حاجه واتمني دايما اكون في بالك بالخير وتفضلي اجمل وألطف وااشطر حبيبه في دنيا 🫀🫂🔐 I love you so much, your friend Namroozaaa🥹🫀🫂🔐
                 </p>
+                <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
               </div>
             </article>
 
-            <!-- Additional cards repeated in original input (kept content) -->
-            <!-- You can add/remove duplicates as your original had many repeated groups; I've preserved the blocks present in your last paste. -->
+            <!-- end of articles -->
           </section>
-
         </main>
       </div>
     </div>
 
-    <!-- LIGHTBOX -->
-    
+    <!-- LIGHTBOX MARKUP (buttons removed as requested) -->
+    <div
+      id="lightbox"
+      class="hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="lb-caption"
+    >
+      <div id="lb-panel" role="document">
+        <div id="lb-media">
+          <img id="lb-img" src="" alt="" />
+        </div>
 
-   
+        <div id="lb-caption" role="status" aria-live="polite">
+          <p class="lb-caption-text clamped"></p>
+          <button class="lb-readmore" style="display:none" aria-expanded="false"></button>
+        </div>
+      </div>
+    </div>
+
     <div id="sr-live" class="sr-only" aria-live="polite"></div>
 
-    <!-- keep your external gallery.js (defer) -->
+    <!-- keep external gallery.js if you have it -->
     <script src="gallery.js" defer></script>
 
     <!-- fade-in init -->
@@ -559,30 +640,7 @@
       });
     </script>
 
-    <!-- Lenis smooth scroll (CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.10/bundled/lenis.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        try {
-          const lenis = new Lenis({
-            duration: 1.2,
-            smooth: true,
-            smoothTouch: true,
-            direction: "vertical",
-          });
-          function raf(t) {
-            lenis.raf(t);
-            requestAnimationFrame(raf);
-          }
-          requestAnimationFrame(raf);
-          window._lenis = lenis;
-        } catch (e) {
-          console.warn("Lenis failed", e);
-        }
-      });
-    </script>
-
-    <!-- deferred background video loader + toggle button -->
+    <!-- safe background-video loader (restores bg video source) -->
     <script>
       (function () {
         const conn = navigator.connection || {};
@@ -607,59 +665,306 @@
             requestIdleCallback(loadBgVideo, { timeout: 1500 });
           else setTimeout(loadBgVideo, 1500);
         }
-        document
-          .getElementById("toggleVideo")
-          .addEventListener("click", function () {
-            loadBgVideo();
-            this.textContent = "خلفية متاحة";
-            this.disabled = true;
-          });
       })();
     </script>
 
-    <!-- minimal lightbox (uses data-full attributes) -->
+    <!-- LIGHTBOX + READ MORE SYNC SCRIPT (labels in English now) -->
     <script>
       (function () {
-        const lb = document.getElementById("lightbox");
-        const lbImg = document.getElementById("lb-img");
-        const lbCaption = document.getElementById("lb-caption");
-        const closeBtn = document.getElementById("close-lb");
-        const downloadBtn = document.getElementById("download-img");
+        // elements
+        const lightbox = document.getElementById("lightbox");
+        const imgEl = document.getElementById("lb-img");
+        const captionWrapper = document.getElementById("lb-caption");
+        const lbText = captionWrapper.querySelector(".lb-caption-text");
+        const lbReadBtn = captionWrapper.querySelector(".lb-readmore");
 
-        document.addEventListener("click", (e) => {
-          const img = e.target.closest && e.target.closest("img[data-full]");
-          if (!img) return;
-          e.preventDefault();
-          lbImg.src = img.getAttribute("data-full") || img.src;
-          lbCaption.textContent = img.alt || "";
-          lb.classList.remove("hidden");
-          lb.classList.add("lb-open");
-          const panel = document.getElementById("lb-panel");
-          panel.style.opacity = "1";
-          panel.style.transform = "scale(1)";
-        });
+        const CARD_SELECTOR = "#gallery article";
+        const IMG_SELECTOR = "#gallery article img";
 
-        function closeLB() {
-          const panel = document.getElementById("lb-panel");
-          panel.style.opacity = "0";
-          panel.style.transform = "scale(.95)";
-          lb.classList.add("hidden");
-          lb.classList.remove("lb-open");
-          lbImg.src = "";
+        // state arrays
+        let images = [];
+        function rebuildImages() {
+          images = Array.from(document.querySelectorAll(IMG_SELECTOR));
         }
-        closeBtn.addEventListener("click", closeLB);
-        lb.addEventListener("click", (e) => {
-          if (e.target === lb) closeLB();
+
+        // --- READ MORE helpers for cards ---
+        function setupReadMoreForArticle(article) {
+          const p = article.querySelector(".card-caption");
+          const btn = article.querySelector(".read-more-btn");
+          if (!p || !btn) return;
+
+          // store full text as attribute
+          const full = p.innerText.trim();
+          p.dataset.full = full;
+
+          // heuristic to show button
+          const need =
+            full.split("\n").length > 3 || full.length > 220 || p.scrollHeight > p.clientHeight;
+          if (!need) {
+            btn.style.display = "none";
+            p.classList.remove("clamped");
+            article.dataset.expanded = "true";
+            btn.setAttribute("aria-expanded", "true");
+            btn.textContent = "";
+            return;
+          }
+
+          // show button
+          btn.style.display = "inline-block";
+          btn.textContent = "Read more";
+          btn.setAttribute("aria-expanded", "false");
+          article.dataset.expanded = "false";
+          // click handler
+          btn.onclick = (e) => {
+            e.preventDefault();
+            const expanded = article.dataset.expanded === "true";
+            setArticleExpanded(article, !expanded);
+          };
+        }
+
+        function setArticleExpanded(article, expand) {
+          const p = article.querySelector(".card-caption");
+          const btn = article.querySelector(".read-more-btn");
+          if (!p || !btn) return;
+          if (expand) {
+            p.classList.remove("clamped");
+            btn.textContent = "Show less";
+            btn.setAttribute("aria-expanded", "true");
+            article.dataset.expanded = "true";
+          } else {
+            p.classList.add("clamped");
+            btn.textContent = "Read more";
+            btn.setAttribute("aria-expanded", "false");
+            article.dataset.expanded = "false";
+          }
+        }
+
+        // apply read-more to all articles
+        function initCardReadMore() {
+          document.querySelectorAll(CARD_SELECTOR).forEach((article) => {
+            setupReadMoreForArticle(article);
+          });
+        }
+
+        // --- LIGHTBOX functions ---
+        function openLightboxAt(index) {
+          rebuildImages();
+          if (index < 0 || index >= images.length) return;
+          const imgNode = images[index];
+          const article = imgNode.closest("article");
+          const src = imgNode.getAttribute("src") || imgNode.getAttribute("data-src") || imgNode.getAttribute("data-full") || "";
+          imgEl.src = src;
+          imgEl.alt = imgNode.alt || "";
+
+          // caption: use article's full text
+          const p = article && article.querySelector(".card-caption");
+          const full = p ? (p.dataset.full || p.innerText) : imgNode.alt || "";
+          lbText.textContent = full;
+
+          // sync read-more initial state from article
+          const expanded = article ? article.dataset.expanded === "true" : false;
+          if (expanded) {
+            lbText.classList.remove("clamped");
+            lbReadBtn.textContent = "Show less";
+            lbReadBtn.setAttribute("aria-expanded", "true");
+            lbReadBtn.style.display = "inline-block";
+          } else {
+            // if caption is short, hide button
+            const need =
+              full.split("\n").length > 3 || full.length > 220;
+            if (need) {
+              lbText.classList.add("clamped");
+              lbReadBtn.textContent = "Read more";
+              lbReadBtn.setAttribute("aria-expanded", "false");
+              lbReadBtn.style.display = "inline-block";
+            } else {
+              lbText.classList.remove("clamped");
+              lbReadBtn.style.display = "none";
+            }
+          }
+
+          // store current article index so toggles can update card
+          lightbox.dataset.currentArticleIndex = index;
+
+          // show
+          lightbox.classList.remove("hidden");
+          lightbox.classList.add("lb-open");
+          document.documentElement.style.overflow = "hidden";
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeLightbox() {
+          lightbox.classList.remove("lb-open");
+          lightbox.classList.add("hidden");
+          imgEl.src = "";
+          lbText.textContent = "";
+          document.documentElement.style.overflow = "";
+          document.body.style.overflow = "";
+        }
+
+        // toggle read-more inside lightbox and sync with card
+        lbReadBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const currentIdx = parseInt(lightbox.dataset.currentArticleIndex || "-1", 10);
+          if (isNaN(currentIdx) || currentIdx < 0) return;
+          const article = images[currentIdx].closest("article");
+          const currentlyExpanded = lbReadBtn.getAttribute("aria-expanded") === "true";
+          if (currentlyExpanded) {
+            // collapse
+            lbText.classList.add("clamped");
+            lbReadBtn.textContent = "Read more";
+            lbReadBtn.setAttribute("aria-expanded", "false");
+            // sync to card
+            setArticleExpanded(article, false);
+          } else {
+            // expand
+            lbText.classList.remove("clamped");
+            lbReadBtn.textContent = "Show less";
+            lbReadBtn.setAttribute("aria-expanded", "true");
+            // sync to card
+            setArticleExpanded(article, true);
+          }
         });
-        downloadBtn.addEventListener("click", () => {
-          if (!lbImg.src) return;
-          const a = document.createElement("a");
-          a.href = lbImg.src;
-          a.download = "";
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
+
+        // open lightbox by clicking image (strictly gallery images)
+        document.addEventListener("click", (e) => {
+          const img = e.target.closest && e.target.closest("img");
+          if (!img) return;
+          if (!img.closest("#gallery")) return;
+          if (!img.closest("article")) return;
+          e.preventDefault();
+          rebuildImages();
+          const idx = images.indexOf(img);
+          if (idx === -1) {
+            // match by src fallback
+            const src = img.getAttribute("src") || img.getAttribute("data-src") || img.getAttribute("data-full") || "";
+            const bySrc = images.findIndex((i) => (i.getAttribute("src") || i.getAttribute("data-src") || i.getAttribute("data-full") || "") === src);
+            if (bySrc === -1) return;
+            openLightboxAt(bySrc);
+            return;
+          }
+          openLightboxAt(idx);
         });
+
+        // close by clicking outside image
+        lightbox.addEventListener("click", (e) => {
+          if (e.target === lightbox) closeLightbox();
+        });
+
+        // keyboard: Esc to close
+        document.addEventListener("keydown", (e) => {
+          if (!lightbox.classList.contains("lb-open")) return;
+          if (e.key === "Escape") closeLightbox();
+        });
+
+        // double-tap for zoom on lb image
+        let lastTap = 0;
+        imgEl.addEventListener("click", () => {
+          const now = Date.now();
+          if (now - lastTap < 300) {
+            if (imgEl.classList.contains("zoomed")) {
+              imgEl.classList.remove("zoomed");
+              imgEl.style.transform = "";
+            } else {
+              imgEl.classList.add("zoomed");
+            }
+            lastTap = 0;
+          } else lastTap = now;
+        });
+
+        // drag while zoomed (pointer)
+        let dragging = false, startX = 0, startY = 0;
+        imgEl.addEventListener("pointerdown", (ev) => {
+          if (!imgEl.classList.contains("zoomed")) return;
+          dragging = true;
+          startX = ev.clientX; startY = ev.clientY;
+          imgEl.setPointerCapture && imgEl.setPointerCapture(ev.pointerId);
+        });
+        imgEl.addEventListener("pointermove", (ev) => {
+          if (!dragging) return;
+          ev.preventDefault();
+          const dx = ev.clientX - startX, dy = ev.clientY - startY;
+          imgEl.style.transform = `translate(${dx}px, ${dy}px) scale(1.12)`;
+        });
+        imgEl.addEventListener("pointerup", (ev) => {
+          dragging = false;
+          imgEl.releasePointerCapture && imgEl.releasePointerCapture(ev.pointerId);
+        });
+        imgEl.addEventListener("pointercancel", () => { dragging = false; });
+
+        // swipe nav across overlay (only when not zoomed)
+        let touchStartX = 0;
+        lightbox.addEventListener("touchstart", (e) => {
+          if (!e.touches || e.touches.length > 1) return;
+          touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+        lightbox.addEventListener("touchend", (e) => {
+          if (!e.changedTouches || e.changedTouches.length > 1) return;
+          // only navigate if not zoomed
+          if (imgEl.classList.contains("zoomed")) return;
+          const delta = e.changedTouches[0].clientX - touchStartX;
+          if (Math.abs(delta) > 50) {
+            rebuildImages();
+            const currentIdx = parseInt(lightbox.dataset.currentArticleIndex || "-1", 10);
+            if (isNaN(currentIdx) || currentIdx < 0) return;
+            if (delta > 0) { // swipe right -> prev
+              const prev = (currentIdx - 1 + images.length) % images.length;
+              openLightboxAt(prev);
+            } else {
+              const next = (currentIdx + 1) % images.length;
+              openLightboxAt(next);
+            }
+          }
+        }, { passive: true });
+
+        // image error
+        imgEl.addEventListener("error", () => {
+          lbText.textContent = "فشل تحميل الصورة";
+          lbReadBtn.style.display = "none";
+        });
+
+        // INIT
+        function init() {
+          rebuildImages();
+          initCardReadMore();
+
+          // attach resize observer to recalc clamped scroll heuristics
+          window.addEventListener("resize", () => {
+            // re-evaluate need for read-more after resize (simple approach)
+            document.querySelectorAll(CARD_SELECTOR).forEach((article) => {
+              const p = article.querySelector(".card-caption");
+              const btn = article.querySelector(".read-more-btn");
+              if (!p || !btn) return;
+              const full = p.dataset.full || p.innerText;
+              const need =
+                full.split("\n").length > 3 || full.length > 220 || p.scrollHeight > p.clientHeight;
+              if (!need) {
+                btn.style.display = "none";
+                p.classList.remove("clamped");
+                article.dataset.expanded = "true";
+                btn.setAttribute("aria-expanded", "true");
+                btn.textContent = "";
+              } else {
+                btn.style.display = "inline-block";
+                btn.textContent = article.dataset.expanded === "true" ? "Show less" : "Read more";
+              }
+            });
+          });
+        }
+
+        // Run
+        init();
+
+        // Expose for debugging
+        window._gallery = {
+          rebuildImages,
+          openLightboxAt,
+          closeLightbox,
+          setArticleExpanded: (artIndex, val) => {
+            const art = document.querySelectorAll(CARD_SELECTOR)[artIndex];
+            if (art) setArticleExpanded(art, val);
+          }
+        };
       })();
     </script>
   </body>
