@@ -50,22 +50,36 @@
          - kept out of pointer events so it doesn't block touches
          - z-index scheme: video (0) < overlay (1) < content (2)
       */
-      #bg-video {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        min-width: 100% !important;
-        min-height: 100% !important;
-        width: auto !important;
-        height: auto !important;
-        object-fit: cover !important;
-        object-position: center center !important;
-        pointer-events: none !important;
-        z-index: 0 !important; /* base layer */
-        display: block !important;
-        background: #000;
-      }
+      /* Mobile-stable background-video fix (drop transform-centering, use inset) */
+#bg-video {
+  position: fixed !important;
+  inset: 0 !important;           /* top:0; right:0; bottom:0; left:0; */
+  width: 100vw !important;       /* use viewport units to avoid layout shrink */
+  height: 100vh !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;    /* remove translate centering — causes issues on some mobiles */
+  object-fit: cover !important;
+  object-position: center center !important;
+  pointer-events: none !important;
+  z-index: -1 !important;        /* keep it strictly behind content */
+  background: #000 !important;
+  display: block !important;
+}
+
+/* ensure no horizontal scrolling from any element */
+html, body { overflow-x: hidden !important; }
+
+/* force main wrapper to fill and be centered */
+.max-w-7xl {
+  width: 100% !important;
+  max-width: 1100px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  position: relative !important;
+  z-index: 1 !important; /* content above bg (bg is -1) */
+}
+
 
       /* overlay between bg and content */
       .bg-overlay {
