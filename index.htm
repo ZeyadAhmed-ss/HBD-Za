@@ -28,19 +28,63 @@
         --lb-scroll-bg: rgba(124,58,237,0.12);
         --lb-scroll-thumb: rgba(124,58,237,0.32);
       }
-      html,
-      body {
+
+      /* reset / base */
+      html, body {
         height: 100%;
-      }
-      body {
         margin: 0;
-        background: #000;
-        color: #fff;
-        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        transform: none !important; /* prevent stacking surprises */
+        -webkit-transform: none !important;
       }
+      body {
+        background: #000;
+        color: #fff;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        overflow-x: hidden; /* important to avoid horizontal scroll from background */
+      }
+
+      /* ========== BACKGROUND VIDEO ========== 
+         - centered reliably (top/left 50% + translate)
+         - kept out of pointer events so it doesn't block touches
+         - z-index scheme: video (0) < overlay (1) < content (2)
+      */
+      #bg-video {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        min-width: 100% !important;
+        min-height: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: cover !important;
+        object-position: center center !important;
+        pointer-events: none !important;
+        z-index: 0 !important; /* base layer */
+        display: block !important;
+        background: #000;
+      }
+
+      /* overlay between bg and content */
+      .bg-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.72), rgba(0,0,0,0.6));
+      }
+
+      /* make sure main content sits above video & overlay */
+      .site-content, .max-w-7xl, #gallery, header, main, aside, .group {
+        position: relative;
+        z-index: 2;
+      }
+
+      /* small safety: ensure no ancestor stacking context ruins fixed positioning */
+      * { -webkit-transform: none; transform: none; }
+
       .fade-in-up {
         transform: translateY(12px);
         opacity: 0;
@@ -101,18 +145,12 @@
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        background: linear-gradient(
-          180deg,
-          rgba(0, 0, 0, 0.6),
-          rgba(0, 0, 0, 0.92)
-        );
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.92));
         padding: 18px;
         -webkit-backdrop-filter: blur(6px);
         backdrop-filter: blur(6px);
       }
-      #lightbox.lb-open {
-        display: flex;
-      }
+      #lightbox.lb-open { display: flex; }
       #lb-panel {
         width: min(1100px, 96%);
         max-height: 92vh;
@@ -126,215 +164,124 @@
         display: grid;
         grid-template-rows: 1fr auto;
       }
-      #lightbox.lb-open #lb-panel {
-        transform: none;
-        opacity: 1;
-      }
+      #lightbox.lb-open #lb-panel { transform: none; opacity: 1; }
 
       /* center & ensure image fits nicely on phones */
-      #lb-media {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #06111a;
-        position: relative;
-        padding: 0;
-        height: calc(100vh - 210px); /* keeps space for caption area while centering image */
-        max-height: calc(100vh - 210px);
-      }
-      @media (max-width:720px){
-        #lb-media { height: calc(100vh - 160px); max-height: calc(100vh - 160px); }
-      }
+      #lb-media { display: flex; align-items: center; justify-content: center; background: #06111a; position: relative; padding: 0; height: calc(100vh - 210px); max-height: calc(100vh - 210px); }
+      @media (max-width:720px){ #lb-media { height: calc(100vh - 160px); max-height: calc(100vh - 160px); } }
 
-      #lb-img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        display: block;
-        transition: transform 0.28s ease;
-        touch-action: none;
-      }
+      #lb-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; transition: transform 0.28s ease; touch-action: none; }
       #lb-img.zoomed { transform: scale(1.12); cursor: grab; }
 
-      /* LIGHTBOX caption area contains the text + read more button */
-      #lb-caption {
-        padding: 1rem;
-        color: #e6edf6;
-        font-size: 1rem;
-        line-height: 1.45;
-        max-height: 240px;
-        overflow: auto;
-        background: linear-gradient(
-          180deg,
-          rgba(0, 0, 0, 0.01),
-          rgba(0, 0, 0, 0.02)
-        );
-      }
+      /* LIGHTBOX caption area */
+      #lb-caption { padding: 1rem; color: #e6edf6; font-size: 1rem; line-height: 1.45; max-height: 240px; overflow: auto; background: linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02)); }
       #lb-caption p { margin: 0 0 .45rem 0; color: #e6edf6; }
-
-      .lb-readmore {
-        background: transparent;
-        border: none;
-        color: #ff6da7;
-        font-weight:700;
-        cursor:pointer;
-        padding:0;
-      }
+      .lb-readmore { background: transparent; border: none; color: #ff6da7; font-weight:700; cursor:pointer; padding:0; }
       .lb-readmore:focus { outline:2px solid rgba(255,109,167,0.12); border-radius:6px; padding:2px 4px; }
 
       /* styled scrollbar for lightbox caption */
       #lb-caption::-webkit-scrollbar { width: 10px; height: 10px; }
       #lb-caption::-webkit-scrollbar-track { background: transparent; margin:6px; border-radius:10px; }
-      #lb-caption::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, var(--lb-scroll-thumb), rgba(124,58,237,0.18));
-        border-radius: 10px;
-        border: 2px solid rgba(11,18,32,0.98);
-        backdrop-filter: blur(2px);
-      }
-      /* firefox */
+      #lb-caption::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--lb-scroll-thumb), rgba(124,58,237,0.18)); border-radius: 10px; border: 2px solid rgba(11,18,32,0.98); backdrop-filter: blur(2px); }
       #lb-caption { scrollbar-width: thin; scrollbar-color: var(--lb-scroll-thumb) transparent; }
 
-      /* small things */
-      .sr-only {
-        position: absolute;
-        left: -10000px;
-        width: 1px;
-        height: 1px;
-        top: auto;
-        overflow: hidden;
+      .sr-only { position: absolute; left: -10000px; width: 1px; height: 1px; top: auto; overflow: hidden; }
+
+      /* responsive tweaks */
+      html { font-size: 16px; }
+      @media (max-width: 768px) {
+        .max-w-7xl { padding-left: 1rem; padding-right: 1rem; }
+        header h1 { font-size: 1.05rem; }
+        .group .text-4xl { font-size: 1.6rem; }
+        .p-10 { padding: 1rem; }
+        .p-6 { padding: 0.9rem; }
+        .text-2xl { font-size: 1.15rem; }
+        #promo-video { object-position: center center; }
+      }
+      @media (max-width: 420px) {
+        html { font-size: 15px; }
+        #lb-caption { font-size: 0.95rem; max-height: 180px; }
+        #lb-panel { width: 96%; }
       }
     </style>
   </head>
 
-  <body class="relative min-h-screen antialiased overflow-x-hidden">
-    <!-- background video (deferred load) -->
+  <body class="site-content relative min-h-screen antialiased">
+    <!-- background video (source included inline so mobile attempts to play) -->
     <video
       id="bg-video"
-      class="fixed inset-0 w-full h-full object-cover -z-20"
       playsinline
       muted
+      autoplay
       loop
       aria-hidden="true"
-      preload="none"
+      preload="auto"
       poster="bg-poster-1280.jpg"
-    ></video>
-    <div
-      class="fixed inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/50 to-black/60"
-    ></div>
+    >
+      <source src="2025-12-02-224627526.mp4" type="video/mp4" />
+      <!-- fallback: poster will show if video unsupported -->
+    </video>
+
+    <!-- overlay to darken the background -->
+    <div class="bg-overlay" aria-hidden="true"></div>
 
     <div class="max-w-7xl mx-auto px-6 py-12">
       <header class="flex items-center justify-between gap-6 mb-6">
         <div class="flex items-center gap-4">
-          <div
-            class="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] shadow-xl flex items-center justify-center"
-          >
-            <img
-              src="1002064262.jpg"
-              alt="logo"
-              class="w-full h-full object-cover"
-            />
+          <div class="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] shadow-xl flex items-center justify-center">
+            <img src="1002064262.jpg" alt="logo" class="w-full h-full object-cover" />
           </div>
           <div>
-            <h1 class="text-lg md:text-xl font-semibold text-white">
-              Bunny — Memories
-            </h1>
+            <h1 class="text-lg md:text-xl font-semibold text-white">Bunny — Memories</h1>
           </div>
         </div>
       </header>
 
-      <section
-        class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start fade-in-up"
-      >
+      <section class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start fade-in-up">
         <div class="lg:col-span-2">
-          <div
-            class="group relative rounded-3xl bg-white p-10 shadow-[0_20px_60px_rgba(0,0,0,0.15)] hover:shadow-[0_30px_90px_rgba(0,0,0,0.22)] hover:-translate-y-2 hover:scale-[1.015] transition-all duration-500 ease-[cubic-bezier(.19,1,.22,1)] overflow-hidden"
-          >
-            <div
-              class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-br from-white/40 via-transparent to-transparent"
-            ></div>
-            <h2
-              class="text-4xl text-center md:text-5xl font-playfair font-extrabold text-slate-900 z-10 relative"
-            >
-              Happy Birthday Bunny
-            </h2>
-            <p
-              class="mt-6 max-w-3xl mx-auto text-center leading-relaxed text-black text-2xl md:text-[28px] font-[500] tracking-tight z-10 relative"
-            >
+          <div class="group relative rounded-3xl bg-white p-10 shadow-[0_20px_60px_rgba(0,0,0,0.15)] hover:shadow-[0_30px_90px_rgba(0,0,0,0.22)] hover:-translate-y-2 hover:scale-[1.015] transition-all duration-500 ease-[cubic-bezier(.19,1,.22,1)] overflow-hidden">
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-br from-white/40 via-transparent to-transparent"></div>
+            <h2 class="text-4xl text-center md:text-5xl font-playfair font-extrabold text-slate-900 z-10 relative">Happy Birthday Bunny</h2>
+            <p class="mt-6 max-w-3xl mx-auto text-center leading-relaxed text-black text-2xl md:text-[28px] font-[500] tracking-tight z-10 relative">
               كنا محتارين شويه في موضوع السايت ده بسبب ضغط الشغل عندي مش أكثر —
               والحمد لله عرفنا نظبطها.
             </p>
             <div class="mt-8 flex justify-center gap-3 z-10 relative">
-              <a
-                href="#gallery"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] text-white text-lg font-semibold shadow-[0_10px_25px_rgba(124,58,237,0.35)] hover:scale-110 transition-transform duration-300"
-                >Show photos</a
-              >
+              <a href="#gallery" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] text-white text-lg font-semibold shadow-[0_10px_25px_rgba(124,58,237,0.35)] hover:scale-110 transition-transform duration-300">Show photos</a>
             </div>
           </div>
         </div>
 
         <aside class="rounded-2xl bg-white p-0 overflow-hidden shadow-xl">
           <div class="relative w-full h-80 bg-black">
-            <video
-              id="promo-video"
-              controls
-              playsinline
-              preload="metadata"
-              class="w-full h-full object-cover"
-            >
+            <video id="promo-video" controls playsinline preload="metadata" class="w-full h-full object-cover">
               <source src="2025-12-02-225333185.mp4" type="video/mp4" />
             </video>
           </div>
           <div class="p-4">
-            <div class="text-la font-bold text-slate-900">
-              Warm the moments With you 🫀🫂🔐
-            </div>
+            <div class="text-la font-bold text-slate-900">Warm the moments With you 🫀🫂🔐</div>
           </div>
         </aside>
       </section>
 
       <div class="mt-8 w-full h-6 opacity-15 mb-6">
-        <svg
-          class="w-full h-full"
-          viewBox="0 0 1200 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M0 12C150 0 350 24 600 12C850 0 1050 24 1200 12"
-            stroke="rgba(255,255,255,0.06)"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
+        <svg class="w-full h-full" viewBox="0 0 1200 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 12C150 0 350 24 600 12C850 0 1050 24 1200 12" stroke="rgba(255,255,255,0.06)" stroke-width="2" stroke-linecap="round" />
         </svg>
       </div>
 
       <!-- GALLERY -->
       <div id="gallery" class="container mx-auto px-4">
         <main class="mt-10">
-          <section
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch"
-          >
+          <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+
             <!-- ARTICLE 1 -->
-            <article
-              data-id="1"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up flex flex-col h-full"
-            >
+            <article data-id="1" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up flex flex-col h-full">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_214219.jpg"
-                  alt="memory 1"
-                  data-full="IMG_20251202_214219.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_214219.jpg" alt="memory 1" data-full="IMG_20251202_214219.jpg" />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col"
-              >
-                <p
-                  class="card-caption mt-3 font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped"
-                >
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
+                <p class="card-caption mt-3 font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
                   نقول بسم لله اخر صور لينا بعد غياب كتير عامة لما تشوفي الكلام ده هيكون يوم عيد ميلادك واخلي يوم يوم عامة حتي مميز زيك 🤩♥ احلي لحظات في الحياه بتبقي واحنا سوا وبحب كل حاجه لينا حقيقي قريبه ليا ♥🫂 كل صوره لينا ليها ذكري وده كان يوم عبثي جدا بس الصور تحفه معروفه عشان بوب فيها 🤩😂 The kindest and most beautiful person in the world. 🫀🫂🔐
                 </p>
                 <div class="mt-2"><button class="read-more-btn" aria-expanded="false" style="display:none"></button></div>
@@ -342,23 +289,11 @@
             </article>
 
             <!-- ARTICLE 2 -->
-            <article
-              data-id="2"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up"
-              style="transition-delay: 0.06s"
-            >
+            <article data-id="2" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up" style="transition-delay: 0.06s">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_215050.jpg"
-                  alt="memory 2"
-                  data-full="IMG_20251202_215050.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_215050.jpg" alt="memory 2" data-full="IMG_20251202_215050.jpg" />
               </div>
-              <div
-                class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col"
-              >
+              <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="mt-3 font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line card-caption clamped">
                   يعني عندك مثلا الصوره اللي فوق ديه كان يوم شاربين في حته لوحدنا من اللي كان بيحصل وانتي عارفه بقا 😂😂😂 بس كان من احلي وأمتع ايامي والله ♥🫂 أما اللي تحت ديه كنا عاملين ماتشي ماتشي بالصدفه عامة كل الماتشي ماتشي بتاعنا صدفه وبتبقي احلي صدفه بجد 😂🥹🤩 اخر ايام الشتويه الصوره اللي في الاخر واخر صور لينا في الشتا يارب يكون بفتكر صح انتي عارفه بنسي 🤩 عامة كل حاجه لينا هنا ليها في قلبي حاجه كل ما بتفكر بضحك من قلبي وبفرح بجد ♥🫂
                 </p>
@@ -367,26 +302,11 @@
             </article>
 
             <!-- ARTICLE 3 -->
-            <article
-              data-id="3"
-              class="card group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up flex flex-col h-full"
-              style="transition-delay: 0.12s"
-            >
-              <div
-                class="card-media aspect-square bg-slate-900 overflow-hidden"
-              >
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_214409.jpg"
-                  alt="memory 3"
-                  data-full="IMG_20251202_214409.jpg"
-                />
+            <article data-id="3" class="card group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-600 fade-in-up flex flex-col h-full" style="transition-delay: 0.12s">
+              <div class="card-media aspect-square bg-slate-900 overflow-hidden">
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_214409.jpg" alt="memory 3" data-full="IMG_20251202_214409.jpg" />
               </div>
-
-              <div
-                class="card-body p-6 bg-white flex-1 flex items-start justify-center text-right flex-col"
-              >
+              <div class="card-body p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line card-caption clamped">
                   الكثير والكثير من بوظ البطه وعيون القهوه اللي بموت فيها والله 🤎🫂🔐✨
                 </p>
@@ -395,18 +315,9 @@
             </article>
 
             <!-- ARTICLE 4 -->
-            <article
-              data-id="1"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-            >
+            <article data-id="1" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_215235.jpg"
-                  alt="memory 4"
-                  data-full="IMG_20251202_215235.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_215235.jpg" alt="memory 4" data-full="IMG_20251202_215235.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -417,19 +328,9 @@
             </article>
 
             <!-- ARTICLE 5 -->
-            <article
-              data-id="2"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-              style="transition-delay: 0.06s"
-            >
+            <article data-id="2" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full" style="transition-delay: 0.06s">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_221652.jpg"
-                  alt="memory 5"
-                  data-full="IMG_20251202_221652.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_221652.jpg" alt="memory 5" data-full="IMG_20251202_221652.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -440,19 +341,9 @@
             </article>
 
             <!-- ARTICLE 6 -->
-            <article
-              data-id="3"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-              style="transition-delay: 0.12s"
-            >
+            <article data-id="3" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full" style="transition-delay: 0.12s">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_222227.jpg"
-                  alt="memory 6"
-                  data-full="IMG_20251202_222227.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_222227.jpg" alt="memory 6" data-full="IMG_20251202_222227.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -463,18 +354,9 @@
             </article>
 
             <!-- ARTICLE 7 -->
-            <article
-              data-id="1"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-            >
+            <article data-id="1" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_222007.jpg"
-                  alt="memory 7"
-                  data-full="IMG_20251202_222007.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_222007.jpg" alt="memory 7" data-full="IMG_20251202_222007.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -485,19 +367,9 @@
             </article>
 
             <!-- ARTICLE 8 -->
-            <article
-              data-id="2"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-              style="transition-delay: 0.06s"
-            >
+            <article data-id="2" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full" style="transition-delay: 0.06s">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_222421.jpg"
-                  alt="memory 8"
-                  data-full="IMG_20251202_222421.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_222421.jpg" alt="memory 8" data-full="IMG_20251202_222421.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -508,19 +380,9 @@
             </article>
 
             <!-- ARTICLE 9 -->
-            <article
-              data-id="3"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-              style="transition-delay: 0.12s"
-            >
+            <article data-id="3" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full" style="transition-delay: 0.12s">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_222819.jpg"
-                  alt="memory 9"
-                  data-full="IMG_20251202_222819.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_222819.jpg" alt="memory 9" data-full="IMG_20251202_222819.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -531,18 +393,9 @@
             </article>
 
             <!-- ARTICLE 10 -->
-            <article
-              data-id="1"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-            >
+            <article data-id="1" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_222553.jpg"
-                  alt="memory 10"
-                  data-full="IMG_20251202_222553.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_222553.jpg" alt="memory 10" data-full="IMG_20251202_222553.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -553,19 +406,9 @@
             </article>
 
             <!-- ARTICLE 11 -->
-            <article
-              data-id="2"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-              style="transition-delay: 0.06s"
-            >
+            <article data-id="2" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full" style="transition-delay: 0.06s">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251202_223216.jpg"
-                  alt="memory 11"
-                  data-full="IMG_20251202_223216.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251202_223216.jpg" alt="memory 11" data-full="IMG_20251202_223216.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -576,19 +419,9 @@
             </article>
 
             <!-- ARTICLE 12 -->
-            <article
-              data-id="3"
-              class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full"
-              style="transition-delay: 0.12s"
-            >
+            <article data-id="3" class="group relative overflow-hidden rounded-2xl shadow-2xl transform transition duration-500 fade-in-up flex flex-col h-full" style="transition-delay: 0.12s">
               <div class="aspect-square bg-slate-900 overflow-hidden">
-                <img
-                  loading="lazy"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="IMG_20251203_161145.jpg"
-                  alt="memory 12"
-                  data-full="IMG_20251203_161145.jpg"
-                />
+                <img loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="IMG_20251203_161145.jpg" alt="memory 12" data-full="IMG_20251203_161145.jpg" />
               </div>
               <div class="p-6 bg-white flex-1 flex items-start justify-center text-right flex-col">
                 <p class="card-caption font-bold text-slate-700 text-lg leading-relaxed whitespace-pre-line clamped">
@@ -604,23 +437,11 @@
       </div>
     </div>
 
-    <!-- LIGHTBOX MARKUP (buttons removed as requested) -->
-    <div
-      id="lightbox"
-      class="hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="lb-caption"
-    >
+    <!-- LIGHTBOX -->
+    <div id="lightbox" class="hidden" role="dialog" aria-modal="true" aria-labelledby="lb-caption">
       <div id="lb-panel" role="document">
-        <div id="lb-media">
-          <img id="lb-img" src="" alt="" />
-        </div>
-
-        <div id="lb-caption" role="status" aria-live="polite">
-          <p class="lb-caption-text clamped"></p>
-          <button class="lb-readmore" style="display:none" aria-expanded="false"></button>
-        </div>
+        <div id="lb-media"><img id="lb-img" src="" alt="" /></div>
+        <div id="lb-caption" role="status" aria-live="polite"><p class="lb-caption-text clamped"></p><button class="lb-readmore" style="display:none" aria-expanded="false"></button></div>
       </div>
     </div>
 
@@ -632,46 +453,13 @@
     <!-- fade-in init -->
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        document
-          .querySelectorAll(".fade-in-up")
-          .forEach((el, i) =>
-            setTimeout(() => el.classList.add("show"), 90 * i)
-          );
+        document.querySelectorAll(".fade-in-up").forEach((el, i) => setTimeout(() => el.classList.add("show"), 90 * i));
       });
     </script>
 
-    <!-- safe background-video loader (restores bg video source) -->
+    <!-- lightbox + read-more script (unchanged behaviour) -->
     <script>
       (function () {
-        const conn = navigator.connection || {};
-        const saveData = conn.saveData === true;
-        const effective = conn.effectiveType || "4g";
-        function loadBgVideo() {
-          const v = document.getElementById("bg-video");
-          if (!v) return;
-          if (v.querySelector("source")) return;
-          const s = document.createElement("source");
-          s.src = "2025-12-02-224627526.mp4";
-          s.type = "video/mp4";
-          v.appendChild(s);
-          v.load();
-          v.play().catch(() => {});
-        }
-        if (
-          !saveData &&
-          (effective.indexOf("4g") >= 0 || effective === "unknown")
-        ) {
-          if ("requestIdleCallback" in window)
-            requestIdleCallback(loadBgVideo, { timeout: 1500 });
-          else setTimeout(loadBgVideo, 1500);
-        }
-      })();
-    </script>
-
-    <!-- LIGHTBOX + READ MORE SYNC SCRIPT (labels in English now) -->
-    <script>
-      (function () {
-        // elements
         const lightbox = document.getElementById("lightbox");
         const imgEl = document.getElementById("lb-img");
         const captionWrapper = document.getElementById("lb-caption");
@@ -681,25 +469,16 @@
         const CARD_SELECTOR = "#gallery article";
         const IMG_SELECTOR = "#gallery article img";
 
-        // state arrays
         let images = [];
-        function rebuildImages() {
-          images = Array.from(document.querySelectorAll(IMG_SELECTOR));
-        }
+        function rebuildImages() { images = Array.from(document.querySelectorAll(IMG_SELECTOR)); }
 
-        // --- READ MORE helpers for cards ---
         function setupReadMoreForArticle(article) {
           const p = article.querySelector(".card-caption");
           const btn = article.querySelector(".read-more-btn");
           if (!p || !btn) return;
-
-          // store full text as attribute
           const full = p.innerText.trim();
           p.dataset.full = full;
-
-          // heuristic to show button
-          const need =
-            full.split("\n").length > 3 || full.length > 220 || p.scrollHeight > p.clientHeight;
+          const need = full.split("\n").length > 3 || full.length > 220 || p.scrollHeight > p.clientHeight;
           if (!need) {
             btn.style.display = "none";
             p.classList.remove("clamped");
@@ -708,125 +487,54 @@
             btn.textContent = "";
             return;
           }
-
-          // show button
           btn.style.display = "inline-block";
           btn.textContent = "Read more";
           btn.setAttribute("aria-expanded", "false");
           article.dataset.expanded = "false";
-          // click handler
-          btn.onclick = (e) => {
-            e.preventDefault();
-            const expanded = article.dataset.expanded === "true";
-            setArticleExpanded(article, !expanded);
-          };
+          btn.onclick = (e) => { e.preventDefault(); const expanded = article.dataset.expanded === "true"; setArticleExpanded(article, !expanded); };
         }
-
         function setArticleExpanded(article, expand) {
           const p = article.querySelector(".card-caption");
           const btn = article.querySelector(".read-more-btn");
           if (!p || !btn) return;
-          if (expand) {
-            p.classList.remove("clamped");
-            btn.textContent = "Show less";
-            btn.setAttribute("aria-expanded", "true");
-            article.dataset.expanded = "true";
-          } else {
-            p.classList.add("clamped");
-            btn.textContent = "Read more";
-            btn.setAttribute("aria-expanded", "false");
-            article.dataset.expanded = "false";
-          }
+          if (expand) { p.classList.remove("clamped"); btn.textContent = "Show less"; btn.setAttribute("aria-expanded", "true"); article.dataset.expanded = "true"; }
+          else { p.classList.add("clamped"); btn.textContent = "Read more"; btn.setAttribute("aria-expanded", "false"); article.dataset.expanded = "false"; }
         }
+        function initCardReadMore() { document.querySelectorAll(CARD_SELECTOR).forEach((article) => setupReadMoreForArticle(article)); }
 
-        // apply read-more to all articles
-        function initCardReadMore() {
-          document.querySelectorAll(CARD_SELECTOR).forEach((article) => {
-            setupReadMoreForArticle(article);
-          });
-        }
-
-        // --- LIGHTBOX functions ---
         function openLightboxAt(index) {
           rebuildImages();
           if (index < 0 || index >= images.length) return;
           const imgNode = images[index];
           const article = imgNode.closest("article");
           const src = imgNode.getAttribute("src") || imgNode.getAttribute("data-src") || imgNode.getAttribute("data-full") || "";
-          imgEl.src = src;
-          imgEl.alt = imgNode.alt || "";
-
-          // caption: use article's full text
+          imgEl.src = src; imgEl.alt = imgNode.alt || "";
           const p = article && article.querySelector(".card-caption");
           const full = p ? (p.dataset.full || p.innerText) : imgNode.alt || "";
           lbText.textContent = full;
-
-          // sync read-more initial state from article
           const expanded = article ? article.dataset.expanded === "true" : false;
-          if (expanded) {
-            lbText.classList.remove("clamped");
-            lbReadBtn.textContent = "Show less";
-            lbReadBtn.setAttribute("aria-expanded", "true");
-            lbReadBtn.style.display = "inline-block";
-          } else {
-            // if caption is short, hide button
-            const need =
-              full.split("\n").length > 3 || full.length > 220;
-            if (need) {
-              lbText.classList.add("clamped");
-              lbReadBtn.textContent = "Read more";
-              lbReadBtn.setAttribute("aria-expanded", "false");
-              lbReadBtn.style.display = "inline-block";
-            } else {
-              lbText.classList.remove("clamped");
-              lbReadBtn.style.display = "none";
-            }
+          if (expanded) { lbText.classList.remove("clamped"); lbReadBtn.textContent = "Show less"; lbReadBtn.setAttribute("aria-expanded", "true"); lbReadBtn.style.display = "inline-block"; }
+          else {
+            const need = full.split("\n").length > 3 || full.length > 220;
+            if (need) { lbText.classList.add("clamped"); lbReadBtn.textContent = "Read more"; lbReadBtn.setAttribute("aria-expanded", "false"); lbReadBtn.style.display = "inline-block"; }
+            else { lbText.classList.remove("clamped"); lbReadBtn.style.display = "none"; }
           }
-
-          // store current article index so toggles can update card
           lightbox.dataset.currentArticleIndex = index;
-
-          // show
-          lightbox.classList.remove("hidden");
-          lightbox.classList.add("lb-open");
-          document.documentElement.style.overflow = "hidden";
-          document.body.style.overflow = "hidden";
+          lightbox.classList.remove("hidden"); lightbox.classList.add("lb-open"); document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden";
         }
 
-        function closeLightbox() {
-          lightbox.classList.remove("lb-open");
-          lightbox.classList.add("hidden");
-          imgEl.src = "";
-          lbText.textContent = "";
-          document.documentElement.style.overflow = "";
-          document.body.style.overflow = "";
-        }
+        function closeLightbox() { lightbox.classList.remove("lb-open"); lightbox.classList.add("hidden"); imgEl.src = ""; lbText.textContent = ""; document.documentElement.style.overflow = ""; document.body.style.overflow = ""; }
 
-        // toggle read-more inside lightbox and sync with card
         lbReadBtn.addEventListener("click", (e) => {
           e.preventDefault();
           const currentIdx = parseInt(lightbox.dataset.currentArticleIndex || "-1", 10);
           if (isNaN(currentIdx) || currentIdx < 0) return;
           const article = images[currentIdx].closest("article");
           const currentlyExpanded = lbReadBtn.getAttribute("aria-expanded") === "true";
-          if (currentlyExpanded) {
-            // collapse
-            lbText.classList.add("clamped");
-            lbReadBtn.textContent = "Read more";
-            lbReadBtn.setAttribute("aria-expanded", "false");
-            // sync to card
-            setArticleExpanded(article, false);
-          } else {
-            // expand
-            lbText.classList.remove("clamped");
-            lbReadBtn.textContent = "Show less";
-            lbReadBtn.setAttribute("aria-expanded", "true");
-            // sync to card
-            setArticleExpanded(article, true);
-          }
+          if (currentlyExpanded) { lbText.classList.add("clamped"); lbReadBtn.textContent = "Read more"; lbReadBtn.setAttribute("aria-expanded", "false"); setArticleExpanded(article, false); }
+          else { lbText.classList.remove("clamped"); lbReadBtn.textContent = "Show less"; lbReadBtn.setAttribute("aria-expanded", "true"); setArticleExpanded(article, true); }
         });
 
-        // open lightbox by clicking image (strictly gallery images)
         document.addEventListener("click", (e) => {
           const img = e.target.closest && e.target.closest("img");
           if (!img) return;
@@ -836,7 +544,6 @@
           rebuildImages();
           const idx = images.indexOf(img);
           if (idx === -1) {
-            // match by src fallback
             const src = img.getAttribute("src") || img.getAttribute("data-src") || img.getAttribute("data-full") || "";
             const bySrc = images.findIndex((i) => (i.getAttribute("src") || i.getAttribute("data-src") || i.getAttribute("data-full") || "") === src);
             if (bySrc === -1) return;
@@ -846,103 +553,39 @@
           openLightboxAt(idx);
         });
 
-        // close by clicking outside image
-        lightbox.addEventListener("click", (e) => {
-          if (e.target === lightbox) closeLightbox();
-        });
+        lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
+        document.addEventListener("keydown", (e) => { if (!lightbox.classList.contains("lb-open")) return; if (e.key === "Escape") closeLightbox(); });
 
-        // keyboard: Esc to close
-        document.addEventListener("keydown", (e) => {
-          if (!lightbox.classList.contains("lb-open")) return;
-          if (e.key === "Escape") closeLightbox();
-        });
-
-        // double-tap for zoom on lb image
         let lastTap = 0;
-        imgEl.addEventListener("click", () => {
-          const now = Date.now();
-          if (now - lastTap < 300) {
-            if (imgEl.classList.contains("zoomed")) {
-              imgEl.classList.remove("zoomed");
-              imgEl.style.transform = "";
-            } else {
-              imgEl.classList.add("zoomed");
-            }
-            lastTap = 0;
-          } else lastTap = now;
-        });
+        imgEl.addEventListener("click", () => { const now = Date.now(); if (now - lastTap < 300) { if (imgEl.classList.contains("zoomed")) { imgEl.classList.remove("zoomed"); imgEl.style.transform = ""; } else { imgEl.classList.add("zoomed"); } lastTap = 0; } else lastTap = now; });
 
-        // drag while zoomed (pointer)
         let dragging = false, startX = 0, startY = 0;
-        imgEl.addEventListener("pointerdown", (ev) => {
-          if (!imgEl.classList.contains("zoomed")) return;
-          dragging = true;
-          startX = ev.clientX; startY = ev.clientY;
-          imgEl.setPointerCapture && imgEl.setPointerCapture(ev.pointerId);
-        });
-        imgEl.addEventListener("pointermove", (ev) => {
-          if (!dragging) return;
-          ev.preventDefault();
-          const dx = ev.clientX - startX, dy = ev.clientY - startY;
-          imgEl.style.transform = `translate(${dx}px, ${dy}px) scale(1.12)`;
-        });
-        imgEl.addEventListener("pointerup", (ev) => {
-          dragging = false;
-          imgEl.releasePointerCapture && imgEl.releasePointerCapture(ev.pointerId);
-        });
+        imgEl.addEventListener("pointerdown", (ev) => { if (!imgEl.classList.contains("zoomed")) return; dragging = true; startX = ev.clientX; startY = ev.clientY; imgEl.setPointerCapture && imgEl.setPointerCapture(ev.pointerId); });
+        imgEl.addEventListener("pointermove", (ev) => { if (!dragging) return; ev.preventDefault(); const dx = ev.clientX - startX, dy = ev.clientY - startY; imgEl.style.transform = `translate(${dx}px, ${dy}px) scale(1.12)`; });
+        imgEl.addEventListener("pointerup", (ev) => { dragging = false; imgEl.releasePointerCapture && imgEl.releasePointerCapture(ev.pointerId); });
         imgEl.addEventListener("pointercancel", () => { dragging = false; });
 
-        // swipe nav across overlay (only when not zoomed)
         let touchStartX = 0;
-        lightbox.addEventListener("touchstart", (e) => {
-          if (!e.touches || e.touches.length > 1) return;
-          touchStartX = e.touches[0].clientX;
-        }, { passive: true });
-        lightbox.addEventListener("touchend", (e) => {
-          if (!e.changedTouches || e.changedTouches.length > 1) return;
-          // only navigate if not zoomed
-          if (imgEl.classList.contains("zoomed")) return;
-          const delta = e.changedTouches[0].clientX - touchStartX;
-          if (Math.abs(delta) > 50) {
-            rebuildImages();
-            const currentIdx = parseInt(lightbox.dataset.currentArticleIndex || "-1", 10);
-            if (isNaN(currentIdx) || currentIdx < 0) return;
-            if (delta > 0) { // swipe right -> prev
-              const prev = (currentIdx - 1 + images.length) % images.length;
-              openLightboxAt(prev);
-            } else {
-              const next = (currentIdx + 1) % images.length;
-              openLightboxAt(next);
-            }
-          }
-        }, { passive: true });
+        lightbox.addEventListener("touchstart", (e) => { if (!e.touches || e.touches.length > 1) return; touchStartX = e.touches[0].clientX; }, { passive: true });
+        lightbox.addEventListener("touchend", (e) => { if (!e.changedTouches || e.changedTouches.length > 1) return; if (imgEl.classList.contains("zoomed")) return; const delta = e.changedTouches[0].clientX - touchStartX; if (Math.abs(delta) > 50) { rebuildImages(); const currentIdx = parseInt(lightbox.dataset.currentArticleIndex || "-1", 10); if (isNaN(currentIdx) || currentIdx < 0) return; if (delta > 0) { const prev = (currentIdx - 1 + images.length) % images.length; openLightboxAt(prev); } else { const next = (currentIdx + 1) % images.length; openLightboxAt(next); } } }, { passive: true });
 
-        // image error
-        imgEl.addEventListener("error", () => {
-          lbText.textContent = "فشل تحميل الصورة";
-          lbReadBtn.style.display = "none";
-        });
+        imgEl.addEventListener("error", () => { lbText.textContent = "فشل تحميل الصورة"; lbReadBtn.style.display = "none"; });
 
-        // INIT
         function init() {
           rebuildImages();
           initCardReadMore();
-
-          // attach resize observer to recalc clamped scroll heuristics
           window.addEventListener("resize", () => {
-            // re-evaluate need for read-more after resize (simple approach)
             document.querySelectorAll(CARD_SELECTOR).forEach((article) => {
               const p = article.querySelector(".card-caption");
               const btn = article.querySelector(".read-more-btn");
               if (!p || !btn) return;
               const full = p.dataset.full || p.innerText;
-              const need =
-                full.split("\n").length > 3 || full.length > 220 || p.scrollHeight > p.clientHeight;
+              const need = full.split("\n").length > 3 || full.length > 220 || p.scrollHeight > p.clientHeight;
               if (!need) {
                 btn.style.display = "none";
                 p.classList.remove("clamped");
                 article.dataset.expanded = "true";
-                btn.setAttribute("aria-expanded", "true");
+                btn.setAttribute("aria-expanded","true");
                 btn.textContent = "";
               } else {
                 btn.style.display = "inline-block";
@@ -951,20 +594,8 @@
             });
           });
         }
-
-        // Run
         init();
-
-        // Expose for debugging
-        window._gallery = {
-          rebuildImages,
-          openLightboxAt,
-          closeLightbox,
-          setArticleExpanded: (artIndex, val) => {
-            const art = document.querySelectorAll(CARD_SELECTOR)[artIndex];
-            if (art) setArticleExpanded(art, val);
-          }
-        };
+        window._gallery = { rebuildImages, openLightboxAt, closeLightbox, setArticleExpanded: (artIndex, val) => { const art = document.querySelectorAll(CARD_SELECTOR)[artIndex]; if (art) setArticleExpanded(art, val); } };
       })();
     </script>
   </body>
